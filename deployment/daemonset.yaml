@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fpga-device-plugin-daemonset
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: fpga-device-plugin-ds
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: fpga-device-plugin-ds
+    spec:
+      hostNetwork: true
+      tolerations:
+        - key: eicas.com.fpga/cpu
+          operator: Exists
+          effect: NoSchedule
+      priorityClassName: "system-node-critical"
+      containers:
+        - image: 172.16.10.189:8088/eicas/fpga-device-plugin:v0.1.0
+          name: fpga-device-plugin-ctr
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: device-plugin
+              mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+        - name: device-plugin
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
