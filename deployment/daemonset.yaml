@@ -19,6 +19,9 @@ spec:
         - key: eicas.com.fpga/cpu
           operator: Exists
           effect: NoSchedule
+        - key: eicas.com.fpga/mem
+          operator: Exists
+          effect: NoSchedule
       priorityClassName: "system-node-critical"
       containers:
         - image: 172.16.10.189:8088/eicas/fpga-device-plugin:v0.1.0

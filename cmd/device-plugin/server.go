@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	fpgaCpu         = "eicas.com.fpga/cpu"
-	fpgaMem         = "eicas.com.fpga/mem"
+	fpgaCpu         = "eicas.com/fpga-cpu"
+	fpgaMem         = "eicas.com/fpga-mem"
 	MemoryBlockSize = 268435456
 	serverSock      = pluginapi.DevicePluginPath + "eicas.sock"
 )
