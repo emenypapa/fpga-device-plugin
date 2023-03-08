@@ -99,7 +99,7 @@ func (t *FpgaDevicePlugin) Stop() error {
 }
 
 // start the grpc sever and register the device plugin to Kubelet
-func (t *FpgaDevicePlugin) Serve() (error, bool) {
+func (t *FpgaDevicePlugin) Serve(resourceName string) (error, bool) {
 	// Create a gRPC server and register the device plugin service.
 	err := t.Start()
 	if err != nil {
@@ -110,7 +110,7 @@ func (t *FpgaDevicePlugin) Serve() (error, bool) {
 
 	// register it to kubelet
 	//pluginapi.RegisterDevicePluginServer(server, p)
-	err = t.Register(pluginapi.KubeletSocket, fpgaCpu)
+	err = t.Register(pluginapi.KubeletSocket, resourceName)
 	if err != nil {
 		log.Printf("Could NOT register eicas device plugin: %s", err)
 		t.Stop()
