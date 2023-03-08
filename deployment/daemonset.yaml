@@ -16,10 +16,10 @@ spec:
     spec:
       hostNetwork: true
       tolerations:
-        - key: eicas.com.fpga/cpu
+        - key: eicas.com/fpga-cpu
           operator: Exists
           effect: NoSchedule
-        - key: eicas.com.fpga/mem
+        - key: eicas.com/fpga-mem
           operator: Exists
           effect: NoSchedule
       priorityClassName: "system-node-critical"
