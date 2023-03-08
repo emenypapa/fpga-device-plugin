@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	fpgaCpu         = "eicas.com/fpga-cpu"
-	fpgaMem         = "eicas.com/fpga-mem"
-	MemoryBlockSize = 268435456
-	serverSock      = pluginapi.DevicePluginPath + "eicas.sock"
+	fpgaCpu           = "eicas.com/fpga-cpu"
+	fpgaMem           = "eicas.com/fpga-mem"
+	MemoryBlockSize   = 268435456
+	serverFpgaCpuSock = pluginapi.DevicePluginPath + "fpga-cpu.sock"
+	serverFpgaMemSock = pluginapi.DevicePluginPath + "fpga-mem.sock"
 )
 
 type FpgaDevicePlugin struct {
@@ -30,9 +31,17 @@ type FpgaDevicePlugin struct {
 // how many tpu will to be allocated
 func NewFpgaDevicePlugin(number int) *FpgaDevicePlugin {
 	return &FpgaDevicePlugin{
-		devices: getDevices(number),
+		devices: getFpgaCpuDevices(number),
 		stopCh:  make(chan interface{}),
-		socket:  serverSock,
+		socket:  serverFpgaCpuSock,
+	}
+}
+
+func NewFpgaMemPlugin(number int) *FpgaDevicePlugin {
+	return &FpgaDevicePlugin{
+		devices: getFpgaMemDevices(number),
+		stopCh:  make(chan interface{}),
+		socket:  serverFpgaMemSock,
 	}
 }
 
@@ -60,23 +69,21 @@ func (t *FpgaDevicePlugin) cleanup() error {
 	return nil
 }
 
-func (t *FpgaDevicePlugin) Register(endpoint string, resourceNames []string) error {
+func (t *FpgaDevicePlugin) Register(endpoint string, resourceName string) error {
 	conn, err := dial(endpoint, 5*time.Second)
 	defer conn.Close()
 	if err != nil {
 		return err
 	}
 	client := pluginapi.NewRegistrationClient(conn)
-	for _, rn := range resourceNames {
-		req := &pluginapi.RegisterRequest{
-			Version:      pluginapi.Version,
-			Endpoint:     path.Base(t.socket),
-			ResourceName: rn,
-		}
-		_, err = client.Register(context.Background(), req)
-		if err != nil {
-			return err
-		}
+	req := &pluginapi.RegisterRequest{
+		Version:      pluginapi.Version,
+		Endpoint:     path.Base(t.socket),
+		ResourceName: resourceName,
+	}
+	_, err = client.Register(context.Background(), req)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -103,8 +110,7 @@ func (t *FpgaDevicePlugin) Serve() (error, bool) {
 
 	// register it to kubelet
 	//pluginapi.RegisterDevicePluginServer(server, p)
-	var resourceNames = []string{fpgaCpu, fpgaCpu}
-	err = t.Register(pluginapi.KubeletSocket, resourceNames)
+	err = t.Register(pluginapi.KubeletSocket, fpgaCpu)
 	if err != nil {
 		log.Printf("Could NOT register eicas device plugin: %s", err)
 		t.Stop()

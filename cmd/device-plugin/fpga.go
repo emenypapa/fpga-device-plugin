@@ -5,7 +5,7 @@ import (
 	pluginapi "k8s.io/kubelet/pkg/apis/deviceplugin/v1beta1"
 )
 
-func getDevices(number int) (devs []*pluginapi.Device) {
+func getFpgaCpuDevices(number int) (devs []*pluginapi.Device) {
 	for i := 0; i < number; i++ {
 
 		fpgaCpuDevice := &pluginapi.Device{
@@ -13,12 +13,17 @@ func getDevices(number int) (devs []*pluginapi.Device) {
 			Health: pluginapi.Healthy,
 		}
 
+		devs = append(devs, fpgaCpuDevice)
+	}
+	return
+}
+
+func getFpgaMemDevices(number int) (devs []*pluginapi.Device) {
+	for i := 0; i < number; i++ {
 		fpgaMemDevice := &pluginapi.Device{
 			ID:     fmt.Sprintf("%s-%d-%d", fpgaMem, MemoryBlockSize, i),
 			Health: pluginapi.Healthy,
 		}
-
-		devs = append(devs, fpgaCpuDevice)
 		devs = append(devs, fpgaMemDevice)
 	}
 	return

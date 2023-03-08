@@ -14,7 +14,12 @@ const fpgaNumber = 1
 
 func main() {
 	devicePlugin := NewFpgaDevicePlugin(fpgaNumber)
+	fpgaMemPlugin := NewFpgaMemPlugin(fpgaNumber)
 	err, _ := devicePlugin.Serve()
+	if err != nil {
+		log.Println("Could not contact Kubelet, Need Support!!")
+	}
+	err, _ = fpgaMemPlugin.Serve()
 	if err != nil {
 		log.Println("Could not contact Kubelet, Need Support!!")
 	}
@@ -32,7 +37,9 @@ func main() {
 
 restart:
 	log.Println("Starting Plugins.")
-	err, restartTime := devicePlugin.Serve()
+	var restartTime bool
+	err, restartTime = devicePlugin.Serve()
+	err, restartTime = fpgaMemPlugin.Serve()
 	if err != nil {
 		log.Println("Could not contact Kubelet, Need Support!!")
 	}
@@ -71,6 +78,7 @@ restart:
 			default:
 				log.Printf("Received signal \"%v\", shutting down.", s)
 				err := devicePlugin.Stop()
+				err = fpgaMemPlugin.Stop()
 				if err == nil {
 					os.Exit(0)
 				}
