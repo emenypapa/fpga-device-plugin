@@ -101,7 +101,7 @@ func runHttpServer() {
 
 	api := r.Group("/api")
 	{
-		api.GET("/tpu", ImportData)
+		api.GET("/fpga", ImportData)
 	}
 
 	_ = r.Run(":8080")
